@@ -11,7 +11,7 @@ interface User {
   password: string;
 }
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response): Promise<Response> => {
   const { username, email, password } = req.body;
 
   try {
@@ -37,9 +37,12 @@ export const createUser = async (req: Request, res: Response) => {
     console.error('Error creating user:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+
+    // Agregar un retorno al final para cubrir todos los casos
+    return res.status(200).json({ message: 'User creation handled' });  
 };
 
-export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
 
   try {
@@ -72,9 +75,12 @@ export const loginUser = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
+
+    // Agregar un retorno al final para cubrir todos los casos
+    return res.status(200).json({ message: 'Login handled' });
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -101,9 +107,12 @@ export const deleteUser = async (req: Request, res: Response) => {
     console.error('Error deleting user:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+
+    // Agregar un retorno al final para cubrir todos los casos
+    return res.status(200).json({ message: 'User deletion handled' });
 };
 
-export const updateUserEmail = async (req: Request, res: Response) => {
+export const updateUserEmail = async (req: Request, res: Response): Promise<Response> => {
   const { email, newEmail, password } = req.body;
 
   if (!email || !newEmail || !password) {
@@ -133,9 +142,12 @@ export const updateUserEmail = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
+
+    // Agregar un retorno al final para cubrir todos los casos
+    return res.status(200).json({ message: 'User email update handled' });
 };
 
-export const updateUserPassword = async (req: Request, res: Response) => {
+export const updateUserPassword = async (req: Request, res: Response): Promise<Response> => {
   const { email, password, newPassword } = req.body;
 
   if (!email || !password || !newPassword) {
@@ -161,6 +173,8 @@ export const updateUserPassword = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
-    return; // Add this line to handle the error case
   }
+
+  // Agregar un retorno al final para cubrir todos los casos
+  return res.status(200).json({ message: 'User password update handled' });
 };

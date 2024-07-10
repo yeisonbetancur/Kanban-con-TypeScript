@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import pool from '../db.ts';
+import pool from '../db.js';
 import jwt from 'jsonwebtoken';
-import { loginSchema, registerSchema, userSchema } from '../Schemas/userSchemas.ts';
+import { loginSchema, registerSchema, userSchema } from '../Schemas/userSchemas.js';
 
 interface User {
   id: number;
@@ -11,7 +11,7 @@ interface User {
   password: string;
 }
 
-export const createUser = async (req: Request, res: Response): Promise<Response> => {
+export const createUser = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { username, email, password } = req.body;
 
   try {
@@ -36,13 +36,10 @@ export const createUser = async (req: Request, res: Response): Promise<Response>
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ error: 'Internal server error' });
-  }
-
-    // Agregar un retorno al final para cubrir todos los casos
-    return res.status(200).json({ message: 'User creation handled' });  
+  } 
 };
 
-export const loginUser = async (req: Request, res: Response): Promise<Response> => {
+export const loginUser = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { email, password } = req.body;
 
   try {
@@ -71,16 +68,13 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
       sameSite: 'strict',
     });
 
-    res.status(200).json({ message: 'Login successful' });
+    res.status(200).json({ message: 'Login successful', token: token });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
-
-    // Agregar un retorno al final para cubrir todos los casos
-    return res.status(200).json({ message: 'Login handled' });
 };
 
-export const deleteUser = async (req: Request, res: Response): Promise<Response> => {
+export const deleteUser = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -107,12 +101,9 @@ export const deleteUser = async (req: Request, res: Response): Promise<Response>
     console.error('Error deleting user:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-
-    // Agregar un retorno al final para cubrir todos los casos
-    return res.status(200).json({ message: 'User deletion handled' });
 };
 
-export const updateUserEmail = async (req: Request, res: Response): Promise<Response> => {
+export const updateUserEmail = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { email, newEmail, password } = req.body;
 
   if (!email || !newEmail || !password) {
@@ -142,12 +133,9 @@ export const updateUserEmail = async (req: Request, res: Response): Promise<Resp
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
-
-    // Agregar un retorno al final para cubrir todos los casos
-    return res.status(200).json({ message: 'User email update handled' });
 };
 
-export const updateUserPassword = async (req: Request, res: Response): Promise<Response> => {
+export const updateUserPassword = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { email, password, newPassword } = req.body;
 
   if (!email || !password || !newPassword) {
@@ -174,7 +162,4 @@ export const updateUserPassword = async (req: Request, res: Response): Promise<R
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
-
-  // Agregar un retorno al final para cubrir todos los casos
-  return res.status(200).json({ message: 'User password update handled' });
 };

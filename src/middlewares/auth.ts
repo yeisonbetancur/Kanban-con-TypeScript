@@ -6,7 +6,7 @@ interface AuthenticatedRequest extends Request {
   user?: string | object; // dependiendo de la estructura del token decodificado
 }
 
-export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction): any => {
+export const authenticate = (req: AuthenticatedRequest, res: Response, next: NextFunction): void | Response => {
   const authHeader = req.headers['authorization'];
   const token = authHeader?.split(' ')[1];
 

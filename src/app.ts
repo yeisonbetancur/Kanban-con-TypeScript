@@ -4,9 +4,11 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import userRoutes from './routes/userRoutes';
-import columnRoutes from './routes/columnRoutes';
-import cardRoutes from './routes/cardRoutes';
+import userRoutes from './routes/userRoutes.js';
+import columnRoutes from './routes/columnRoutes.js';
+import cardRoutes from './routes/cardRoutes.js';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,8 +18,6 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type'],
 };
-
-dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -38,16 +38,13 @@ app.use('/api', userRoutes); // Ruta para los usuarios
 app.use('/api', columnRoutes); // Ruta para las columnas
 app.use('/api', cardRoutes); // Ruta para las tarjetas
 
-app.use((err: Error, _req: Request, res: Response) => {
-  console.error(err.stack);
-  res.status(500).send('Internal Server Error');
-});
-
+// Middleware para manejar errores
 app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
   if (err.name === 'ValidationError') {
     res.status(400).json({ error: err.message });
   } else {
-    next(err);
+    res.status(500).send('Internal Server Error');
   }
 });
 

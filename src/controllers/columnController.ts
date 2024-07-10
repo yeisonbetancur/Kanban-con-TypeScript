@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import pool from '../db';
+import pool from '../db.js';
 import z from 'zod';
 
 // Esquema de validación para columnas
@@ -9,7 +9,7 @@ const columnSchema = z.object({
 });
 
 // Obtener las columnas por ID de usuario
-export const getColumnByUserId = async (req: Request, res: Response): Promise<Response> => {
+export const getColumnByUserId = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { user_id } = req.params;
 
   try {
@@ -26,13 +26,10 @@ export const getColumnByUserId = async (req: Request, res: Response): Promise<Re
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
-
-    // Agregar un retorno al final para cubrir todos los casos
-    return res.status(200).json({ message: 'Card deletion handled' });
 };
 
 // Crear una nueva columna
-export const createColumn = async (req: Request, res: Response): Promise<Response> => {
+export const createColumn = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { title, user_id } = req.body;
 
   try {
@@ -50,13 +47,10 @@ export const createColumn = async (req: Request, res: Response): Promise<Respons
     }
     res.status(500).json({ error: 'Internal server error' });
   }
-
-      // Agregar un retorno al final para cubrir todos los casos
-      return res.status(200).json({ message: 'Card deletion handled' });
 };
 
 // Actualizar una columna por ID
-export const updateColumn = async (req: Request, res: Response): Promise<Response> => {
+export const updateColumn = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { user_id } = req.params;
   const { title } = req.body;
 
@@ -78,12 +72,10 @@ export const updateColumn = async (req: Request, res: Response): Promise<Respons
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
-      // Agregar un retorno al final para cubrir todos los casos
-      return res.status(200).json({ message: 'Card deletion handled' });
 };
 
 // Eliminar una columna por user_id
-export const deleteColumn = async (req: Request, res: Response): Promise<Response> => {
+export const deleteColumn = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { user_id } = req.params;
 
   if (!z.string().safeParse(user_id).success) {
@@ -101,7 +93,4 @@ export const deleteColumn = async (req: Request, res: Response): Promise<Respons
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
-
-      // Agregar un retorno al final para cubrir todos los casos
-      return res.status(200).json({ message: 'Card deletion handled' });
 };

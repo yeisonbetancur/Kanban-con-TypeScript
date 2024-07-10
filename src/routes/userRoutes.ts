@@ -5,8 +5,8 @@ import {
   deleteUser,
   updateUserEmail,
   updateUserPassword,
-} from '../controllers/userController';
-import { authenticate } from '../middlewares/auth';
+} from '../controllers/userController.js';
+import { authenticate } from '../middlewares/auth.js';
 
 const router = express.Router();
 

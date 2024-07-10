@@ -4,8 +4,8 @@ import {
   createColumn,
   updateColumn,
   deleteColumn,
-} from '../controllers/columnController';
-import { authenticate } from '../middlewares/auth';
+} from '../controllers/columnController.js';
+import { authenticate } from '../middlewares/auth.js';
 
 const router = express.Router();
 

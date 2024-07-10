@@ -1,29 +1,18 @@
 import { Request, Response } from 'express';
 import pool from '../db.js';
 import z from 'zod';
-
-// Validar los datos de la tarjeta
-const cardSchema = z.object({
-  column_id: z.number().int().positive(),
-  user_id: z.number().int().positive(),
-  title: z.string().min(1).max(255),
-  description: z.string().optional(),
-});
-
-//tipo para la respuesta a la promesa en las funciones
-interface Card {
-  id: number;
-  column_id: number;
-  user_id: number;
-  title: string;
-  description: string;
-};
-
+import { Card } from '../types';
+import { cardSchema } from '../Schemas/cardsSchemas.js';
 
 // Obtener las tarjetas por ID de la columna
 export const getCardsByColumnId = async (req: Request, res: Response): Promise< Response | undefined> => {
     const { column_id } = req.params;
-  
+
+    // Validar column id manualmente
+    if (column_id === 'undefined' || parseInt(column_id) <= 0 || !Number.isInteger(parseInt(column_id))) {
+      return res.status(400).json({ error: 'Invalid column id' });
+    }
+
     try {
       const { rows} : {rows: Card[]} = await pool.query('SELECT * FROM cards WHERE column_id = $1', [column_id]);
       if (rows.length === 0) {
@@ -31,9 +20,11 @@ export const getCardsByColumnId = async (req: Request, res: Response): Promise< 
       }
       res.status(200).json( rows );
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.log(error);
+        return res.status(400).json({ error: error.errors[0].message });
+      }
       res.status(500).json({ error: 'Internal server error' });
-      // You can also add a return statement here to ensure all code paths return a response.
-      return res.status(500).json({ error: 'Internal server error' });
     }
   };
 
@@ -59,7 +50,9 @@ export const createCard = async (req: Request, res: Response): Promise<Response 
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       } else {
-        console.error('Error creating card:', error);
+        if (error instanceof z.ZodError) {
+          return res.status(400).json({ error: error.errors[0].message });
+        }
         return res.status(500).json({ error: 'Internal server error' });
       }
     }
@@ -71,6 +64,11 @@ export const updateCard = async (req: Request, res: Response): Promise<Response 
     // la descripcion es opcional
     const { title, description } = req.body;
 
+    // Validar los datos manualmente
+    if (id === 'undefined' || parseInt(id) <= 0 || !Number.isInteger(parseInt(id))) {
+      return res.status(400).json({ error: 'Invalid card id' });
+    }
+
     if (!title) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -79,13 +77,15 @@ export const updateCard = async (req: Request, res: Response): Promise<Response 
         return res.status(400).json({ error: 'Invalid title' });
     }
 
-    try {  
-    const { rows }: {rows: Card[]} = description
-    ? await pool.query(
+  try {  
+    // Validar datos con Zod
+    cardSchema.parse({ title, description });
+    const { rows }: { rows: Card[] } = description
+      ? await pool.query(
         'UPDATE cards SET title = $1, description = $2 WHERE id = $3 RETURNING *',
         [title, description, id]
       )
-    : await pool.query('UPDATE cards SET title = $1 WHERE id = $2 RETURNING *', [title, id]);
+      : await pool.query('UPDATE cards SET title = $1 WHERE id = $2 RETURNING *', [title, id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Card not found' });
@@ -94,9 +94,8 @@ export const updateCard = async (req: Request, res: Response): Promise<Response 
     res.status(200).json(rows[0]);
   } catch (error) {
         if (error instanceof z.ZodError) {
-            return res.status(400).json({ error: error.errors });
+            return res.status(400).json({ error: error.errors[0].message });
         } else {
-            console.error('Error updating card:', error);
             return res.status(500).json({ error: 'Internal server error' });
         }
     }
@@ -105,6 +104,11 @@ export const updateCard = async (req: Request, res: Response): Promise<Response 
 // Eliminar una tarjeta por ID
 export const deleteCard = async (req: Request, res: Response): Promise<Response | undefined> => {
     const { id } = req.params;
+
+    // Validar los datos manualmente
+    if (id === 'undefined' || parseInt(id) <= 0 || !Number.isInteger(parseInt(id))) {
+      return res.status(400).json({ error: 'Invalid card id' });
+    }
   
     try {
       const { rows }: {rows: Card[]} = await pool.query('DELETE FROM cards WHERE id = $1 RETURNING *', [id]);
@@ -113,6 +117,9 @@ export const deleteCard = async (req: Request, res: Response): Promise<Response 
       }
       res.status(200).json({ message: 'Card deleted successfully' });
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
       return res.status(500).json({ error: 'Internal server error' });
     }
   };

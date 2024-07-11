@@ -25,11 +25,11 @@ export const getCardsByColumnId = async (req, res) => {
 };
 // Crear una nueva tarjeta
 export const createCard = async (req, res) => {
-    const { title, column_id, description, user_id } = req.body;
+    const { title, column_id, description, user_id, position } = req.body;
     try {
         // Validar datos con Zod
-        cardSchema.parse({ column_id, user_id, title, description });
-        const { rows } = await pool.query('INSERT INTO cards (title, column_id, description, user_id) VALUES ($1, $2, $3, $4) RETURNING *', [title, column_id, description, user_id]);
+        cardSchema.parse({ column_id, user_id, title, description, position });
+        const { rows } = await pool.query('INSERT INTO cards (title, column_id, description, user_id, position) VALUES ($1, $2, $3, $4, $5) RETURNING *', [title, column_id, description, user_id, position]);
         if (rows.length === 0) {
             return res.status(500).json({ error: 'Failed to create card' });
         }

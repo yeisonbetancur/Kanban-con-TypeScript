@@ -16,8 +16,8 @@ export const createUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         // Crear el nuevo usuario
         const { rows } = await pool.query('INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *', [username, email, hashedPassword]);
-        //Crear una columna por defecto
-        await pool.query('INSERT INTO columns (title, user_id) VALUES ($1, $2)', ['Inbox', rows[0].id]);
+        // crear colimna por defecto
+        await pool.query('INSERT INTO columns (title, user_id, position) VALUES ($1, $2, $3) RETURNING *', ['column', rows[0].id, 1]);
         res.status(201).json({
             id: rows[0].id,
             username: rows[0].username,
@@ -28,6 +28,7 @@ export const createUser = async (req, res) => {
         if (error instanceof z.ZodError) {
             return res.status(400).json({ error: error.errors[0].message });
         }
+        console.log(error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

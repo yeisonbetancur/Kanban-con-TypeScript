@@ -24,10 +24,10 @@ export const getColumnByUserId = async (req, res) => {
 };
 // Crear una nueva columna
 export const createColumn = async (req, res) => {
-    const { title, user_id } = req.body;
+    const { title, user_id, position } = req.body;
     try {
-        columnSchema.parse({ title, user_id });
-        const { rows } = await pool.query('INSERT INTO columns (title, user_id) VALUES ($1, $2) RETURNING *', [title, user_id]);
+        columnSchema.parse({ title, user_id, position });
+        const { rows } = await pool.query('INSERT INTO columns (title, user_id, position) VALUES ($1, $2, $3) RETURNING *', [title, user_id, position]);
         res.status(201).json(rows[0]);
     }
     catch (error) {
@@ -98,6 +98,32 @@ export const getSectionsTasks = async (req, res) => {
             columnsWithTasks.push({ column, tasks });
         }
         res.status(200).json(columnsWithTasks);
+    }
+    catch (error) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ error: error.errors[0].message });
+        }
+        return handleError(error, res);
+    }
+};
+// Cambiar la posición de una columna
+export const changeColumnPosition = async (req, res) => {
+    const { column_id, position } = req.body;
+    console.log(column_id, position);
+    if (column_id === 'undefined' || parseInt(column_id) <= 0 || !Number.isInteger(parseInt(column_id))) {
+        return res.status(400).json({ error: 'Invalid column id' });
+    }
+    if (position === 'undefined' || parseInt(position) <= 0 || !Number.isInteger(parseInt(position))) {
+        return res.status(400).json({ error: 'Invalid position' });
+    }
+    try {
+        const { rows } = await pool.query('UPDATE columns SET position = $1 WHERE id = $2 RETURNING *', [position, column_id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Column not found' });
+        }
+        res.status(200).json({ message: 'Column position updated successfully',
+            column: rows[0]
+        });
     }
     catch (error) {
         if (error instanceof z.ZodError) {

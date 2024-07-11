@@ -34,6 +34,7 @@ export const createUser = async (req, res) => {
 };
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
+    console.log(email);
     try {
         loginSchema.parse({ email, password });
         const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);

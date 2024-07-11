@@ -47,6 +47,8 @@ export const createUser = async (req: Request, res: Response): Promise<Response 
 export const loginUser = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { email, password } = req.body;
 
+  console.log(email);
+
   try {
     loginSchema.parse({ email, password });
 

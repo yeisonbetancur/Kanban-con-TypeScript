@@ -85,16 +85,12 @@ export const updateColumn = async (req: Request, res: Response): Promise<Respons
   }
 };
 
-// Eliminar una columna por user_id
+// Eliminar una columna por id
 export const deleteColumn = async (req: Request, res: Response): Promise<Response | undefined> => {
-  const { user_id } = req.params;
-
-  if (user_id === 'undefined' || parseInt(user_id) <= 0 || !Number.isInteger(parseInt(user_id))) {
-    return res.status(400).json({ error: 'Invalid user id' });
-  }
+  const { id } = req.params;
 
   try {
-    const { rows }: { rows: Column[] } = await pool.query('DELETE FROM columns WHERE user_id = $1 RETURNING *', [user_id]);
+    const { rows }: { rows: Column[] } = await pool.query('DELETE FROM columns WHERE id = $1 RETURNING *', [id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Column not found' });

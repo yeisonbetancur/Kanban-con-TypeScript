@@ -298,6 +298,22 @@ Authorization: Bearer YOUR_TOKEN
   "message": "Card deleted successfully"
 }
             </pre>
+
+            <h3 class="text-xl font-bold mb-2">Change Card Position</h3>
+            <pre class="bg-gray-200 p-4 rounded">
+PUT api/cards_position
+Authorization: Bearer YOUR_TOKEN
+{
+  "position": 2,  // new position
+  "id": 1 
+}
+            </pre>
+            <p class="mb-4">Response:</p>
+            <pre class="bg-gray-200 p-4 rounded">
+{
+  "message": "Card position updated successfully"
+}
+            </pre>
         </div>
 
         <!-- Errors Section -->

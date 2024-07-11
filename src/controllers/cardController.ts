@@ -101,6 +101,33 @@ export const updateCard = async (req: Request, res: Response): Promise<Response 
     }
 };
 
+// Cambiar posicion de una tarjeta por ID
+export const updateCardPosition = async (req: Request, res: Response): Promise<Response | undefined> => {
+    const { position, id } = req.body;
+    // Validar los datos manualmente
+    if (id === 'undefined' || parseInt(id) <= 0 || !Number.isInteger(parseInt(id))) {
+      return res.status(400).json({ error: 'Invalid card id' });
+    }
+    if (position === 'undefined' || parseInt(position) <= 0 || !Number.isInteger(parseInt(position))) { 
+      return res.status(400).json({ error: 'Invalid position' });
+    }
+    try {
+      const { rows }: { rows: Card[] } = await pool.query(
+        'UPDATE cards SET position = $1 WHERE id = $2 RETURNING *',
+        [position, id]
+      );
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Card not found' });
+      }
+      res.status(200).json(rows[0]);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
 // Eliminar una tarjeta por ID
 export const deleteCard = async (req: Request, res: Response): Promise<Response | undefined> => {
     const { id } = req.params;

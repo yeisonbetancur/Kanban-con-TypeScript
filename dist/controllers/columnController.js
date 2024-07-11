@@ -129,8 +129,6 @@ export const changeColumnPosition = async (req, res, next) => {
         if (error instanceof z.ZodError) {
             return res.status(400).json({ error: error.errors[0].message });
         }
-        next();
-        return handleError(error, res);
     }
 };
 // manejador de errores

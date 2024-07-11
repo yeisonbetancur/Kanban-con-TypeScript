@@ -181,8 +181,6 @@ export const changeColumnPosition = async (req: Request, res: Response, next: Ne
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors[0].message });
     }
-    next();
-    return handleError(error, res);
   
   }
 };

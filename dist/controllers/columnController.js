@@ -107,7 +107,7 @@ export const getSectionsTasks = async (req, res) => {
     }
 };
 // Cambiar la posición de una columna
-export const changeColumnPosition = async (req, res) => {
+export const changeColumnPosition = async (req, res, next) => {
     const { column_id, position } = req.body;
     console.log(column_id, position);
     if (column_id === 'undefined' || parseInt(column_id) <= 0 || !Number.isInteger(parseInt(column_id))) {
@@ -129,6 +129,7 @@ export const changeColumnPosition = async (req, res) => {
         if (error instanceof z.ZodError) {
             return res.status(400).json({ error: error.errors[0].message });
         }
+        next();
         return handleError(error, res);
     }
 };

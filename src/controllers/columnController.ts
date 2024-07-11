@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import pool from '../db.js';
 import z from 'zod';
 import { Card, Column } from '../types';
@@ -152,7 +152,7 @@ export const getSectionsTasks = async (req: Request, res: Response): Promise<Res
 };
 
 // Cambiar la posición de una columna
-export const changeColumnPosition = async (req: Request, res: Response): Promise<Response | undefined> => {
+export const changeColumnPosition = async (req: Request, res: Response, next: NextFunction): Promise<Response | undefined> => {
   const { column_id , position } = req.body;
 
   console.log(column_id, position);
@@ -177,10 +177,13 @@ export const changeColumnPosition = async (req: Request, res: Response): Promise
       column: rows[0]
      });
   } catch (error) {
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors[0].message });
     }
+    next();
     return handleError(error, res);
+  
   }
 };
 

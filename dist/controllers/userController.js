@@ -38,13 +38,19 @@ export const loginUser = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(400).json({ error: 'Invalid email or password' });
         }
+        // Crear objeto sin la contraseña
+        const userWithoutPassword = {
+            id: user.id,
+            username: user.username,
+            email: user.email
+        };
         const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7h' });
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // Solo se envía a través de HTTPS en producción
             sameSite: 'strict',
         });
-        res.status(200).json({ message: 'Login successful', token: token });
+        res.status(200).json({ message: 'Login successful', user: userWithoutPassword, token: token });
     }
     catch (error) {
         if (error instanceof z.ZodError) {
@@ -52,6 +58,11 @@ export const loginUser = async (req, res) => {
         }
         res.status(500).json({ error: 'Internal server error' });
     }
+};
+// Cerrar sesión y borrar el token, si existe
+export const logoutUser = (res) => {
+    res.clearCookie('token');
+    res.status(200).json({ message: 'Logout successful' });
 };
 export const deleteUser = async (req, res) => {
     const { email, password } = req.body;

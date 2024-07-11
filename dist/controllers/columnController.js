@@ -79,6 +79,33 @@ export const deleteColumn = async (req, res) => {
         return handleError(error, res);
     }
 };
+// Exporta la función getSectionsTasks que obtiene todas las secciones de un usuario específico con sus tareas
+export const getSectionsTasks = async (req, res) => {
+    const { user_id } = req.params;
+    if (user_id === 'undefined' || parseInt(user_id) <= 0 || !Number.isInteger(parseInt(user_id))) {
+        return res.status(400).json({ error: 'Invalid user id' });
+    }
+    try {
+        const { rows: columns } = await pool.query('SELECT * FROM columns WHERE user_id = $1', [user_id]);
+        if (columns.length === 0) {
+            return res.status(404).json({ error: 'Column not found' });
+        }
+        // Array de ojetos para almacenar las columnas y sus cartas
+        const columnsWithTasks = [];
+        // iterar sobre las columnas y obtener sus tareas
+        for (const column of columns) {
+            const { rows: tasks } = await pool.query('SELECT * FROM cards WHERE column_id = $1', [column.id]);
+            columnsWithTasks.push({ column, tasks });
+        }
+        res.status(200).json(columnsWithTasks);
+    }
+    catch (error) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ error: error.errors[0].message });
+        }
+        return handleError(error, res);
+    }
+};
 // manejador de errores
 function handleError(error, res) {
     if (error instanceof z.ZodError) {
@@ -86,11 +113,11 @@ function handleError(error, res) {
     }
     // error del servidor cuando pide una columna que ya existe
     if (error.code === '23505') {
-        return res.status(409).json({ error: 'Column already exists' });
+        return res.status(409).json({ error: error.errors[0].message });
     }
     // si el id de usuario es inválido
     if (error.code === '23503') {
-        return res.status(400).json({ error: 'Invalid user id' });
+        return res.status(400).json({ error: error.errors[0].message });
     }
     res.status(500).json({ error: 'Internal server error' });
 }

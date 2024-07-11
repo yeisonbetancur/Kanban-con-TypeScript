@@ -4,6 +4,7 @@ import {
   createColumn,
   updateColumn,
   deleteColumn,
+  getSectionsTasks,
 } from '../controllers/columnController.js';
 import { authenticate } from '../middlewares/auth.js';
 
@@ -13,5 +14,7 @@ router.get('/columns/:user_id', authenticate, getColumnByUserId); // obtener las
 router.post('/columns', authenticate, createColumn); // crear una nueva columna
 router.put('/columns/:user_id', authenticate, updateColumn); // actualizar una columna
 router.delete('/columns/:user_id', authenticate, deleteColumn); // eliminar una columna
+router.get('/sections/:user_id', authenticate, getSectionsTasks);
+
 
 export default router;

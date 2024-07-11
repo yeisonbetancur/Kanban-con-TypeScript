@@ -16,6 +16,14 @@ const __dirname = path.dirname(__filename);
 const corsOptions = {
   origin: '*', // Reemplaza con la URL de tu dominio o dominios permitidos
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  Headers: {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+
+    'Access-Control-Allow-Credentials': 'true',
+  },
   allowedHeaders: ['Content-Type'],
 };
 

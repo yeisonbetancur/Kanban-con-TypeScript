@@ -193,3 +193,35 @@ export const updateUserPassword = async (req: Request, res: Response): Promise<R
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Cambiar el username
+export const updateUserUsername = async (req: Request, res: Response): Promise<Response | undefined> => {
+  const { email, password, newUsername } = req.body;
+
+  if (!email || !password || !newUsername) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    userSchema.pick({ email: true, password: true}).parse({ email, password});
+
+    const { rows }: { rows: User[] } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid email or password' });
+    }
+
+    const user: User = rows[0];
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: 'Invalid email or password' });
+    } 
+
+    await pool.query('UPDATE users SET username = $1 WHERE email = $2', [newUsername, email]);
+    res.status(200).json({ message: 'User updated successfully' });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors[0].message });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

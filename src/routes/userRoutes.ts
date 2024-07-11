@@ -5,7 +5,8 @@ import {
   deleteUser,
   updateUserEmail,
   updateUserPassword,
-  logoutUser
+  updateUserUsername,
+  logoutUser,
 } from '../controllers/userController.js';
 import { authenticate } from '../middlewares/auth.js';
 
@@ -28,5 +29,8 @@ router.put('/user/update/email', authenticate, updateUserEmail);
 
 // Ruta para actualizar password de usuario
 router.put('/user/update/password', authenticate, updateUserPassword);
+
+// Ruta para actualizar el username de usuario
+router.put('/user/update/username', authenticate, updateUserUsername);
 
 export default router;

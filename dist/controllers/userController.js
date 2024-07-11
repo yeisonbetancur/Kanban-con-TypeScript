@@ -16,7 +16,13 @@ export const createUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         // Crear el nuevo usuario
         const { rows } = await pool.query('INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *', [username, email, hashedPassword]);
-        res.status(201).json(rows[0]);
+        //Crear una columna por defecto
+        await pool.query('INSERT INTO columns (title, user_id) VALUES ($1, $2)', ['Inbox', rows[0].id]);
+        res.status(201).json({
+            id: rows[0].id,
+            username: rows[0].username,
+            email: rows[0].email
+        });
     }
     catch (error) {
         if (error instanceof z.ZodError) {
@@ -137,6 +143,33 @@ export const updateUserPassword = async (req, res) => {
         }
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
+        res.status(200).json({ message: 'User updated successfully' });
+    }
+    catch (error) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ error: error.errors[0].message });
+        }
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+// Cambiar el username
+export const updateUserUsername = async (req, res) => {
+    const { email, password, newUsername } = req.body;
+    if (!email || !password || !newUsername) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    try {
+        userSchema.pick({ email: true, password: true }).parse({ email, password });
+        const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (rows.length === 0) {
+            return res.status(400).json({ error: 'Invalid email or password' });
+        }
+        const user = rows[0];
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ error: 'Invalid email or password' });
+        }
+        await pool.query('UPDATE users SET username = $1 WHERE email = $2', [newUsername, email]);
         res.status(200).json({ message: 'User updated successfully' });
     }
     catch (error) {

@@ -14,14 +14,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const corsOptions = {
-  origin: '*', // Reemplaza con la URL de tu dominio o dominios permitidos
+  origin: '*', 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   Headers: {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-
     'Access-Control-Allow-Credentials': 'true',
   },
   allowedHeaders: ['Content-Type'],
@@ -42,7 +41,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
 
-app.use('/api', userRoutes); // Ruta para los usuarios
+app.use('/api',  userRoutes); // Ruta para los usuarios
 app.use('/api', columnRoutes); // Ruta para las columnas
 app.use('/api', cardRoutes); // Ruta para las tarjetas
 

@@ -30,15 +30,15 @@ export const getCardsByColumnId = async (req: Request, res: Response): Promise< 
 
 // Crear una nueva tarjeta
 export const createCard = async (req: Request, res: Response): Promise<Response | undefined> => {
-    const { title, column_id, description, user_id, position } = req.body;
+    const { title, column_id, description, user_id, position, position_column } = req.body;
   
     try {
       // Validar datos con Zod
       cardSchema.parse({ column_id, user_id, title, description, position });
   
       const { rows }: {rows: Card[]} = await pool.query(
-        'INSERT INTO cards (title, column_id, description, user_id, position) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [title, column_id, description, user_id, position]
+        'INSERT INTO cards (title, column_id, description, user_id, position, position_column) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [title, column_id, description, user_id, position, position_column]
       );
   
       if (rows.length === 0) {
@@ -127,6 +127,33 @@ export const updateCardPosition = async (req: Request, res: Response): Promise<R
       return res.status(500).json({ error: 'Internal server error' });
     }
   };
+
+// cambiar la posicion de la targeta con position_column
+export const updateCardPosition_column = async (req: Request, res: Response): Promise<Response | undefined> => {
+  const { position_column, id } = req.body;
+  // Validar los datos manualmente
+  if (id === 'undefined' || parseInt(id) <= 0 || !Number.isInteger(parseInt(id))) {
+    return res.status(400).json({ error: 'Invalid card id' });
+  }
+  if (position_column === 'undefined' || parseInt(position_column) <= 0 || !Number.isInteger(parseInt(position_column))) { 
+    return res.status(400).json({ error: 'Invalid position' });
+  }
+  try {
+    const { rows }: { rows: Card[] } = await pool.query(
+      'UPDATE cards SET position_column = $1 WHERE id = $2 RETURNING *',
+      [position_column, id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+    res.status(200).json(rows[0]);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors[0].message });
+    }
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 // Eliminar una tarjeta por ID
 export const deleteCard = async (req: Request, res: Response): Promise<Response | undefined> => {

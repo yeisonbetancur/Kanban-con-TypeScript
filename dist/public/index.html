@@ -86,14 +86,15 @@ Authorization: Bearer YOUR_TOKEN
   "message": "User deleted successfully"
 }
             </pre>
-            
-            <h3 class="text-xl font-bold mb-2">Update User Email</h3>
+
+            <h3 class="text-xl font-bold mb-2">Update Username</h3>
             <pre class="bg-gray-200 p-4 rounded">
-PUT /users/email
-Authorization: Bearer YOUR_TOKEN
+PUT /users/update/username
+Ahorization: Bearer YOUR_TOKEN
 {
   "email": "user@example.com",
-  "newEmail": "newemail@example.com"
+  "password": "oldpassword",
+  "newUsername": "newusername"
 }
             </pre>
             <p class="mb-4">Response:</p>
@@ -101,12 +102,29 @@ Authorization: Bearer YOUR_TOKEN
 {
   "message": "User updated successfully"
 }
+                        </pre>
             </pre>
-            
+            <h3 class="text-xl font-bold mb-2">Update User Email</h3>
+            <pre class="bg-gray-200 p-4 rounded">
+PUT /users/update/email
+Ahorization: Bearer YOUR_TOKEN
+{
+  "email": "user@example.com",
+  "password": "oldpassword",
+  "newEmail": "newemail@example.com"
+}
+            </pre>
+            <p class="mb-4">Response:</p>
+            <pre class="bg-gray-200 p-4 rounded">
+{
+  "message": "User updated successfully"
+              }
+            </pre>
+
             <h3 class="text-xl font-bold mb-2">Update User Password</h3>
             <pre class="bg-gray-200 p-4 rounded">
-PUT /users/password
-Authorization: Bearer YOUR_TOKEN
+PUT /users/update/password
+Ahorization: Bearer YOUR_TOKEN
 {
   "email": "user@example.com",
   "password": "oldpassword",
@@ -119,6 +137,7 @@ Authorization: Bearer YOUR_TOKEN
   "message": "User updated successfully"
 }
             </pre>
+
         </div>
 
         <!-- Columns Section -->
@@ -176,6 +195,23 @@ Authorization: Bearer YOUR_TOKEN
   "title": "Updated Column",
   "board_id": 1
 }
+            </pre>
+
+            <h3 class="text-xl font-bold mb-2">Get Columns and Cards of user_id</h3>
+            <pre class="bg-gray-200 p-4 rounded">
+GET /columns/section/user_id
+Authorization: Bearer YOUR_TOKEN
+            </pre>
+            <p class="mb-4">Response:</p>
+            <pre class="bg-gray-200 p-4 rounded">
+[
+  {
+    "id": 1,
+    "title": "To Do",
+    "board_id": 1
+  },
+  ...
+]
             </pre>
             
             <h3 class="text-xl font-bold mb-2">Delete Column</h3>

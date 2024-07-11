@@ -3,7 +3,7 @@ import pool from '../db.js';
 import z from 'zod';
 import { Card, Column } from '../types';
 import { columnSchema } from '../Schemas/columnsSchemas.js';
-
+import jwt from 'jsonwebtoken';
 
 
 // Obtener las columnas por ID de usuario
@@ -107,7 +107,10 @@ export const deleteColumn = async (req: Request, res: Response): Promise<Respons
 
 // Exporta la función getSectionsTasks que obtiene todas las secciones de un usuario específico con sus tareas
 export const getSectionsTasks = async (req: Request, res: Response): Promise<Response | undefined> => {
-  const { user_id } = req.params;
+  const authHeader = req.headers['authorization'];
+  const token = authHeader?.split(' ')[1];
+  const decoded: any = jwt.verify(token as string, process.env.JWT_SECRET as string);
+  const user_id = decoded.id;
   if (user_id === 'undefined' || parseInt(user_id) <= 0 || !Number.isInteger(parseInt(user_id))) {
     return res.status(400).json({ error: 'Invalid user id' });
   }

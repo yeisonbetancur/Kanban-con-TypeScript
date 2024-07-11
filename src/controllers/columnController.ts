@@ -36,10 +36,16 @@ export const getColumnByUserId = async (req: Request, res: Response): Promise<Re
 
 // Crear una nueva columna
 export const createColumn = async (req: Request, res: Response): Promise<Response | undefined > => {
-  const { title, user_id, position } = req.body;
-
+  const { title, position } = req.body;
+  const authHeader = req.headers['authorization'];
+  const token = authHeader?.split(' ')[1];
+  const decoded: any = jwt.verify(token as string, process.env.JWT_SECRET as string);
+  const user_id = decoded.id;
+  console.log(user_id + " " + title
+  + " " + position
+  )
   try {
-    columnSchema.parse({ title, user_id , position});
+    columnSchema.parse({ title, user_id, position});
 
     const { rows }: { rows: Column[] } = await pool.query(
       'INSERT INTO columns (title, user_id, position) VALUES ($1, $2, $3) RETURNING *',

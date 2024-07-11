@@ -3,6 +3,6 @@ import z from 'zod';
 export const columnSchema = z.object({
     title: z.string(),
     user_id: z.number().int().positive(),
-    position: z.number().int().positive()
+    position: z.string()
 });
 //# sourceMappingURL=columnsSchemas.js.map

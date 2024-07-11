@@ -27,7 +27,14 @@ export const createUser = async (req: Request, res: Response): Promise<Response 
       [username, email, hashedPassword]
     );
 
-    res.status(201).json(rows[0]);
+    //Crear una columna por defecto
+    await pool.query('INSERT INTO columns (title, user_id) VALUES ($1, $2)', ['Inbox', rows[0].id]);
+
+    res.status(201).json({
+      id: rows[0].id,
+      username: rows[0].username,
+      email: rows[0].email
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors[0].message });

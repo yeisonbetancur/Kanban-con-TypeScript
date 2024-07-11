@@ -23,6 +23,7 @@ const corsOptions = {
     allowedHeaders: ['Content-Type'],
 };
 const app = express();
+app.options('*', cors());
 const port = process.env.PORT || 3000;
 // Configura Express para servir archivos estáticos desde el directorio 'public'
 app.use(express.static(path.join(__dirname, 'public')));

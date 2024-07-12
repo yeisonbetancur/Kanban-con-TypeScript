@@ -72,7 +72,7 @@ export const updateColumn = async (req: Request, res: Response): Promise<Respons
   }
 
   try {
-    columnSchema.parse({ title });
+    columnSchema.parse({ title, user_id  });
     const result = await pool.query(
       'UPDATE columns SET title = $1 WHERE user_id = $2 RETURNING *',
       [title, user_id]

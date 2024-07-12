@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUser, loginUser, deleteUser, updateUserEmail, updateUserPassword, updateUserUsername, logoutUser, checkToken, } from '../controllers/userController.js';
+import { createUser, loginUser, deleteUser, updateUserEmail, updateUserPassword, updateUserUsername, logoutUser, checkToken, getUserById } from '../controllers/userController.js';
 import { authenticate } from '../middlewares/auth.js';
 const router = express.Router();
 // Ruta para crear un nuevo usuario (registro)
@@ -18,5 +18,7 @@ router.put('/user/update/password', authenticate, updateUserPassword);
 router.put('/user/update/username', authenticate, updateUserUsername);
 // Ruta para verificar el token
 router.get('/user/check_token', checkToken);
+// Ruta para obtener usuario por id
+router.get('/user/:id', authenticate, getUserById);
 export default router;
 //# sourceMappingURL=userRoutes.js.map

@@ -8,6 +8,7 @@ import {
   updateUserUsername,
   logoutUser,
   checkToken,
+  getUserById
 } from '../controllers/userController.js';
 import { authenticate } from '../middlewares/auth.js';
 
@@ -36,5 +37,8 @@ router.put('/user/update/username', authenticate, updateUserUsername);
 
 // Ruta para verificar el token
 router.get('/user/check_token',checkToken);
+
+// Ruta para obtener usuario por id
+router.get('/user/:id', authenticate, getUserById);
 
 export default router;

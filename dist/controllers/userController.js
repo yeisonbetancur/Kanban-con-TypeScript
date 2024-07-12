@@ -195,4 +195,26 @@ export const updateUserUsername = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+// Obtener un usuarios Por id
+export const getUserById = async (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    try {
+        const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+        // sin la contraseña
+        rows[0].password = '';
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.status(200).json(rows[0]);
+    }
+    catch (error) {
+        if (error instanceof z.ZodError) {
+            return res.status(400).json({ error: error.errors[0].message });
+        }
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 //# sourceMappingURL=userController.js.map

@@ -52,7 +52,7 @@ export const updateColumn = async (req, res) => {
         return res.status(400).json({ error: 'Invalid user id' });
     }
     try {
-        columnSchema.parse({ title });
+        columnSchema.parse({ title, user_id });
         const result = await pool.query('UPDATE columns SET title = $1 WHERE user_id = $2 RETURNING *', [title, user_id]);
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Column not found' });

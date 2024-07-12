@@ -242,3 +242,31 @@ export const updateUserUsername = async (req: Request, res: Response): Promise<R
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Obtener un usuarios Por id
+export const getUserById = async (req: Request, res: Response): Promise<Response | undefined> => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const { rows }: { rows: User[] } = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    // sin la contraseña
+    const user = {
+      id: rows[0].id,
+      username: rows[0].username,
+      email: rows[0].email
+    };
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors[0].message });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

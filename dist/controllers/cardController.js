@@ -75,7 +75,7 @@ export const updateCard = async (req, res) => {
     }
     catch (error) {
         if (error instanceof z.ZodError) {
-            return res.status(400).json({ error: error.errors[0].message });
+            return res.status(400).json({ error: error.errors });
         }
         else {
             return res.status(500).json({ error: 'Internal server error' });

@@ -6,7 +6,8 @@ export const cardSchema = z.object({
     user_id: z.number().int().positive(),
     title: z.string().min(1),
     description: z.string().optional(),
-    position: z.number().int().positive()
+    position: z.number().int().positive(),
+    position_column: z.number().int().positive()
   });
   
 

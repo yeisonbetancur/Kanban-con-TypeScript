@@ -30,11 +30,11 @@ export const getCardsByColumnId = async (req: Request, res: Response): Promise< 
 
 // Crear una nueva tarjeta
 export const createCard = async (req: Request, res: Response): Promise<Response | undefined> => {
-    const { title, column_id, description, user_id, position, position_column } = req.body;
+    const { title, column_id, description, user_id, position = 1, position_column = 1 } = req.body;
   
     try {
       // Validar datos con Zod
-      cardSchema.parse({ column_id, user_id, title, description, position });
+      cardSchema.parse({ column_id, user_id, title, description, position, position_column});
   
       const { rows }: {rows: Card[]} = await pool.query(
         'INSERT INTO cards (title, column_id, description, user_id, position, position_column) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',

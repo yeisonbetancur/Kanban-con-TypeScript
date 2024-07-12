@@ -47,8 +47,6 @@ export const createUser = async (req: Request, res: Response): Promise<Response 
 export const loginUser = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { email, password } = req.body;
 
-  console.log(email);
-
   try {
     loginSchema.parse({ email, password });
 
@@ -96,6 +94,22 @@ export const loginUser = async (req: Request, res: Response): Promise<Response |
 export const logoutUser = ( res: Response) => {
   res.clearCookie('token');
   res.status(200).json({ message: 'Logout successful' });
+};
+
+// Check the token 
+export const checkToken =(req: Request, res: Response) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader?.split(' ')[1];
+  try{
+    const decode = jwt.verify(token as string, process.env.JWT_SECRET as string);
+    if (!decode) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    res.status(200).json({ message: 'Authorized' });
+  }
+  catch (error) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 };
 
 

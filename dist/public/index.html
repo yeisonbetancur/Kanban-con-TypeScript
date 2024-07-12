@@ -138,6 +138,15 @@ Ahorization: Bearer YOUR_TOKEN
 }
             </pre>
 
+            <h3 class="text-xl font-bold mb-2">Check Token</h3>
+GET api/user/check_token 
+Ahorization: Bearer Token
+
+            <p class="mb-4">Response:</p>
+{
+  "message": "Unauthorized"
+}
+
         </div>
 
         <!-- Columns Section -->
@@ -151,7 +160,7 @@ POST api/columns
 Authorization: Bearer YOUR_TOKEN
 {
   "title": "New Column",
-  "board_id": 1
+  "position": 1
 }
             </pre>
             <p class="mb-4">Response:</p>
@@ -159,16 +168,17 @@ Authorization: Bearer YOUR_TOKEN
 {
   "id": 2,
   "title": "New Column",
-  "board_id": 1
+  "position": 1
 }
             </pre>
             
             <h3 class="text-xl font-bold mb-2">Update Column</h3>
             <pre class="bg-gray-200 p-4 rounded">
-PUT api/columns/{id}
+PUT api/columns
 Authorization: Bearer YOUR_TOKEN
 {
-  "title": "Updated Column"
+  "title": "Updated Column",
+  "position": "2"
 }
             </pre>
             <p class="mb-4">Response:</p>
@@ -176,24 +186,46 @@ Authorization: Bearer YOUR_TOKEN
 {
   "id": 2,
   "title": "Updated Column",
-  "board_id": 1
+  "position": 2
 }
             </pre>
 
             <h3 class="text-xl font-bold mb-2">Get Columns and Cards of user_id</h3>
             <pre class="bg-gray-200 p-4 rounded">
-GET api/columns/section/user_id
+GET api/columns/section
 Authorization: Bearer YOUR_TOKEN
             </pre>
             <p class="mb-4">Response:</p>
             <pre class="bg-gray-200 p-4 rounded">
 [
-  {
-    "id": 1,
-    "title": "To Do",
-    "board_id": 1
+{
+  "column": {
+    "id": 11,
+    "user_id": 2,
+    "title": "to do",
+    "position": 1
   },
-  ...
+  "tasks": [
+    {
+      "id": 14,
+      "column_id": 11,
+      "user_id": 1,
+      "title": "Tercera Tarea",
+      "description": "Descripción de la nueva tarea",
+      "position": 1,
+      "position_column": 1
+    },
+    {
+      "id": 13,
+      "column_id": 11,
+      "user_id": 1,
+      "title": "segunda tarea",
+      "description": "Descripción de la nueva tarea",
+      "position": 1,
+      "position_column": 2
+    }
+  ]
+}
 ]
             </pre>
             <h3 class="text-xl font-bold mb-2">Change Column Position</h3>

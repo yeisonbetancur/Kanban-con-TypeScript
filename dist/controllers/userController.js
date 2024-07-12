@@ -34,7 +34,6 @@ export const createUser = async (req, res) => {
 };
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
-    console.log(email);
     try {
         loginSchema.parse({ email, password });
         const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
@@ -71,6 +70,21 @@ export const loginUser = async (req, res) => {
 export const logoutUser = (res) => {
     res.clearCookie('token');
     res.status(200).json({ message: 'Logout successful' });
+};
+// Check the token 
+export const checkToken = (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.split(' ')[1];
+    try {
+        const decode = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decode) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        res.status(200).json({ message: 'Authorized' });
+    }
+    catch (error) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
 };
 export const deleteUser = async (req, res) => {
     const { email, password } = req.body;

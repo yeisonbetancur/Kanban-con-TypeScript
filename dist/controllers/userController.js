@@ -113,21 +113,17 @@ export const deleteUser = async (req, res) => {
     }
 };
 export const updateUserEmail = async (req, res) => {
-    const { email, newEmail, password } = req.body;
-    if (!email || !newEmail || !password) {
+    const { email, newEmail } = req.body;
+    if (!email || !newEmail) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
-        userSchema.pick({ email: true, password: true }).parse({ email, password });
+        userSchema.pick({ email: true }).parse({ email });
         const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         if (rows.length === 0) {
             return res.status(400).json({ error: 'Invalid email or password' });
         }
         const user = rows[0];
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ error: 'Invalid email or password' });
-        }
         if (user.email === newEmail) {
             return res.status(400).json({ error: 'New email must be different from old email' });
         }
@@ -142,21 +138,17 @@ export const updateUserEmail = async (req, res) => {
     }
 };
 export const updateUserPassword = async (req, res) => {
-    const { email, password, newPassword } = req.body;
-    if (!email || !password || !newPassword) {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
-        userSchema.pick({ email: true, password: true, username: true }).parse({ email, password, username: 'dummy' });
+        userSchema.pick({ email: true, username: true }).parse({ email, username: 'dummy' });
         const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         if (rows.length === 0) {
             return res.status(400).json({ error: 'Invalid email or password' });
         }
         const user = rows[0];
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(400).json({ error: 'Invalid email or password' });
-        }
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
         res.status(200).json({ message: 'User updated successfully' });
@@ -170,19 +162,14 @@ export const updateUserPassword = async (req, res) => {
 };
 // Cambiar el username
 export const updateUserUsername = async (req, res) => {
-    const { email, password, newUsername } = req.body;
-    if (!email || !password || !newUsername) {
+    const { email, newUsername } = req.body;
+    if (!email || !newUsername) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
-        userSchema.pick({ email: true, password: true }).parse({ email, password });
+        userSchema.pick({ email: true }).parse({ email });
         const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         if (rows.length === 0) {
-            return res.status(400).json({ error: 'Invalid email or password' });
-        }
-        const user = rows[0];
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
             return res.status(400).json({ error: 'Invalid email or password' });
         }
         await pool.query('UPDATE users SET username = $1 WHERE email = $2', [newUsername, email]);
@@ -204,11 +191,15 @@ export const getUserById = async (req, res) => {
     try {
         const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
         // sin la contraseña
-        rows[0].password = '';
+        const user = {
+            id: rows[0].id,
+            username: rows[0].username,
+            email: rows[0].email
+        };
         if (rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
-        res.status(200).json(rows[0]);
+        res.status(200).json(user);
     }
     catch (error) {
         if (error instanceof z.ZodError) {

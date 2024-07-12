@@ -145,14 +145,14 @@ export const deleteUser = async (req: Request, res: Response): Promise<Response 
 };
 
 export const updateUserEmail = async (req: Request, res: Response): Promise<Response | undefined> => {
-  const { email, newEmail, password } = req.body;
+  const { email, newEmail } = req.body;
 
-  if (!email || !newEmail || !password) {
+  if (!email || !newEmail) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    userSchema.pick({ email: true, password: true }).parse({ email, password });
+    userSchema.pick({ email: true}).parse({ email});
 
     const { rows }: { rows: User[] } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (rows.length === 0) {
@@ -160,11 +160,6 @@ export const updateUserEmail = async (req: Request, res: Response): Promise<Resp
     }
 
     const user: User = rows[0];
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ error: 'Invalid email or password' });
-    }
-
     if (user.email === newEmail) {
       return res.status(400).json({ error: 'New email must be different from old email' });
     }
@@ -180,14 +175,14 @@ export const updateUserEmail = async (req: Request, res: Response): Promise<Resp
 };
 
 export const updateUserPassword = async (req: Request, res: Response): Promise<Response | undefined> => {
-  const { email, password, newPassword } = req.body;
+  const { email,  newPassword } = req.body;
 
-  if (!email || !password || !newPassword) {
+  if (!email || !newPassword) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    userSchema.pick({ email: true, password: true, username: true }).parse({ email, password, username: 'dummy' });
+    userSchema.pick({ email: true, username: true }).parse({ email, username: 'dummy' });
 
     const { rows }: { rows: User[] } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (rows.length === 0) {
@@ -195,11 +190,6 @@ export const updateUserPassword = async (req: Request, res: Response): Promise<R
     }
 
     const user: User = rows[0];
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ error: 'Invalid email or password' });
-    }
-
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
     res.status(200).json({ message: 'User updated successfully' });
@@ -213,26 +203,19 @@ export const updateUserPassword = async (req: Request, res: Response): Promise<R
 
 // Cambiar el username
 export const updateUserUsername = async (req: Request, res: Response): Promise<Response | undefined> => {
-  const { email, password, newUsername } = req.body;
+  const { email, newUsername } = req.body;
 
-  if (!email || !password || !newUsername) {
+  if (!email || !newUsername) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    userSchema.pick({ email: true, password: true}).parse({ email, password});
+    userSchema.pick({ email: true}).parse({ email});
 
     const { rows }: { rows: User[] } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (rows.length === 0) {
       return res.status(400).json({ error: 'Invalid email or password' });
     }
-
-    const user: User = rows[0];
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ error: 'Invalid email or password' });
-    } 
-
     await pool.query('UPDATE users SET username = $1 WHERE email = $2', [newUsername, email]);
     res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {

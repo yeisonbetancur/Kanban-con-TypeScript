@@ -25,7 +25,7 @@ export const getColumnByUserId = async (req, res) => {
 };
 // Crear una nueva columna
 export const createColumn = async (req, res) => {
-    const { title, position } = req.body;
+    const { title, position = 1 } = req.body;
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

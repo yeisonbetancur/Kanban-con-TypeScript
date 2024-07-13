@@ -164,7 +164,7 @@ export const updateUser = async (req: Request, res: Response): Promise<Response 
     if (newUsername) {
       await pool.query('UPDATE users SET username = $1 WHERE id = $2', [newUsername, user_id]);
     }
-    res.status(200).json({ message: 'User updated successfully' });
+    res.status(200).json({ message: 'User updated successfully'});
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors[0].message });

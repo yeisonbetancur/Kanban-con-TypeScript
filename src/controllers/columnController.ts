@@ -60,22 +60,21 @@ export const createColumn = async (req: Request, res: Response): Promise<Respons
 
 // Actualizar una columna por ID
 export const updateColumn = async (req: Request, res: Response): Promise<Response | undefined> => {
-  const { user_id } = req.params;
+  const { id } = req.params;
   const { title } = req.body;
 
-  if (!title || !user_id) {
+  if (!title || !id) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  if (user_id === 'undefined' || parseInt(user_id) <= 0 || !Number.isInteger(parseInt(user_id))) {
+  if (id === 'undefined' || parseInt(id) <= 0 || !Number.isInteger(parseInt(id))) {
     return res.status(400).json({ error: 'Invalid user id' });
   }
 
   try {
-    columnSchema.parse({ title, user_id  });
     const result = await pool.query(
-      'UPDATE columns SET title = $1 WHERE user_id = $2 RETURNING *',
-      [title, user_id]
+      'UPDATE columns SET title = $1 WHERE id = $2 RETURNING *',
+      [title, id]
     );
 
     if (result.rows.length === 0) {
@@ -85,8 +84,10 @@ export const updateColumn = async (req: Request, res: Response): Promise<Respons
     res.status(200).json(result.rows[0]);
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.log(error);
       return res.status(400).json({ error: error.errors[0].message });
     }
+    console.log(error);
     return handleError(error, res);
   }
 };

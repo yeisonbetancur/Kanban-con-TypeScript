@@ -30,10 +30,15 @@ export const createCard = async (req, res) => {
         // Validar datos con Zod
         cardSchema.parse({ column_id, user_id, title, description, position, position_column });
         const { rows } = await pool.query('INSERT INTO cards (title, column_id, description, user_id, position, position_column) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [title, column_id, description, user_id, position, position_column]);
+        // obtener los datos de su columna
+        const { rows: column } = await pool.query('SELECT * FROM columns WHERE id = $1', [column_id]);
         if (rows.length === 0) {
             return res.status(500).json({ error: 'Failed to create card' });
         }
-        res.status(201).json(rows);
+        res.status(201).json({
+            column: column[0],
+            card: rows[0],
+        });
     }
     catch (error) {
         if (error instanceof z.ZodError) {
@@ -43,6 +48,7 @@ export const createCard = async (req, res) => {
             if (error instanceof z.ZodError) {
                 return res.status(400).json({ error: error.errors[0].message });
             }
+            console.log(error);
             return res.status(500).json({ error: 'Internal server error' });
         }
     }

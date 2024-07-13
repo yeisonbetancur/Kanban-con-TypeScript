@@ -112,7 +112,6 @@ export const checkToken =(req: Request, res: Response) => {
   }
 };
 
-
 export const deleteUser = async (req: Request, res: Response): Promise<Response | undefined> => {
   const { email, password } = req.body;
 

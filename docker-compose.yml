@@ -1,0 +1,10 @@
+version: 'version'
+
+services:
+  api_rest_kanban:
+    container_name: api_rest_kanban
+    build: .
+    env_file: ".env"
+    ports:
+      - "3000:3000"
+    command: npm start

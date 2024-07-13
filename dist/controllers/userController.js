@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import pool from '../db.js';
 import jwt from 'jsonwebtoken';
-import { loginSchema, registerSchema, userSchema } from '../Schemas/userSchemas.js';
+import { loginSchema, registerSchema } from '../Schemas/userSchemas.js';
 import z from 'zod';
 export const createUser = async (req, res) => {
     const { username, email, password } = req.body;
@@ -112,67 +112,25 @@ export const deleteUser = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-export const updateUserEmail = async (req, res) => {
-    const { email, newEmail } = req.body;
-    if (!email || !newEmail) {
+// Chage all dates from user 
+export const updateUser = async (req, res) => {
+    const { newEmail, newPassword, newUsername } = req.body;
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.split(' ')[1];
+    // obtener id
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user_id = decoded.id;
+    if (!newEmail || !newPassword || !newUsername) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
-        userSchema.pick({ email: true }).parse({ email });
-        const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [user_id]);
         if (rows.length === 0) {
-            return res.status(400).json({ error: 'Invalid email or password' });
-        }
-        const user = rows[0];
-        if (user.email === newEmail) {
-            return res.status(400).json({ error: 'New email must be different from old email' });
-        }
-        await pool.query('UPDATE users SET email = $1 WHERE email = $2', [newEmail, email]);
-        res.status(200).json({ message: 'User updated successfully' });
-    }
-    catch (error) {
-        if (error instanceof z.ZodError) {
-            return res.status(400).json({ error: error.errors[0].message });
-        }
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
-export const updateUserPassword = async (req, res) => {
-    const { email, newPassword } = req.body;
-    if (!email || !newPassword) {
-        return res.status(400).json({ error: 'Missing required fields' });
-    }
-    try {
-        userSchema.pick({ email: true, username: true }).parse({ email, username: 'dummy' });
-        const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        if (rows.length === 0) {
-            return res.status(400).json({ error: 'Invalid email or password' });
+            return res.status(404).json({ error: 'User not found' });
         }
         const user = rows[0];
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
-        res.status(200).json({ message: 'User updated successfully' });
-    }
-    catch (error) {
-        if (error instanceof z.ZodError) {
-            return res.status(400).json({ error: error.errors[0].message });
-        }
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
-// Cambiar el username
-export const updateUserUsername = async (req, res) => {
-    const { email, newUsername } = req.body;
-    if (!email || !newUsername) {
-        return res.status(400).json({ error: 'Missing required fields' });
-    }
-    try {
-        userSchema.pick({ email: true }).parse({ email });
-        const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-        if (rows.length === 0) {
-            return res.status(400).json({ error: 'Invalid email or password' });
-        }
-        await pool.query('UPDATE users SET username = $1 WHERE email = $2', [newUsername, email]);
+        await pool.query('UPDATE users SET email = $1, username = $2, password = $3 WHERE id = $4', [newEmail, newUsername, hashedPassword, user_id]);
         res.status(200).json({ message: 'User updated successfully' });
     }
     catch (error) {

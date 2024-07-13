@@ -143,54 +143,28 @@ export const deleteUser = async (req: Request, res: Response): Promise<Response 
   }
 };
 
-export const updateUserEmail = async (req: Request, res: Response): Promise<Response | undefined> => {
-  const { email, newEmail } = req.body;
+// Chage all dates from user 
+export const updateUser = async (req: Request, res: Response): Promise<Response | undefined> => {
+  const { newEmail, newPassword, newUsername } = req.body;
+  const authHeader = req.headers['authorization'];
+  const token = authHeader?.split(' ')[1];
 
-  if (!email || !newEmail) {
+  // obtener id
+  const decoded: any = jwt.verify(token as string, process.env.JWT_SECRET as string);
+  const user_id = decoded.id;
+
+  if (!newEmail || !newPassword || !newUsername) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    userSchema.pick({ email: true}).parse({ email});
-
-    const { rows }: { rows: User[] } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const { rows }: { rows: User[] } = await pool.query('SELECT * FROM users WHERE id = $1', [user_id]);
     if (rows.length === 0) {
-      return res.status(400).json({ error: 'Invalid email or password' });
+      return res.status(404).json({ error: 'User not found' });
     }
-
-    const user: User = rows[0];
-    if (user.email === newEmail) {
-      return res.status(400).json({ error: 'New email must be different from old email' });
-    }
-
-    await pool.query('UPDATE users SET email = $1 WHERE email = $2', [newEmail, email]);
-    res.status(200).json({ message: 'User updated successfully' });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
-    }
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-export const updateUserPassword = async (req: Request, res: Response): Promise<Response | undefined> => {
-  const { email,  newPassword } = req.body;
-
-  if (!email || !newPassword) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-
-  try {
-    userSchema.pick({ email: true, username: true }).parse({ email, username: 'dummy' });
-
-    const { rows }: { rows: User[] } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (rows.length === 0) {
-      return res.status(400).json({ error: 'Invalid email or password' });
-    }
-
     const user: User = rows[0];
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
+    await pool.query('UPDATE users SET email = $1, username = $2, password = $3 WHERE id = $4', [newEmail, newUsername, hashedPassword, user_id]);
     res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -200,30 +174,7 @@ export const updateUserPassword = async (req: Request, res: Response): Promise<R
   }
 };
 
-// Cambiar el username
-export const updateUserUsername = async (req: Request, res: Response): Promise<Response | undefined> => {
-  const { email, newUsername } = req.body;
 
-  if (!email || !newUsername) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-
-  try {
-    userSchema.pick({ email: true}).parse({ email});
-
-    const { rows }: { rows: User[] } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (rows.length === 0) {
-      return res.status(400).json({ error: 'Invalid email or password' });
-    }
-    await pool.query('UPDATE users SET username = $1 WHERE email = $2', [newUsername, email]);
-    res.status(200).json({ message: 'User updated successfully' });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
-    }
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
 
 // Obtener un usuarios Por id
 export const getUserById = async (req: Request, res: Response): Promise<Response | undefined> => {

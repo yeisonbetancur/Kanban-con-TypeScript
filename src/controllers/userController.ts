@@ -153,26 +153,25 @@ export const updateUser = async (req: Request, res: Response): Promise<Response 
   const decoded: any = jwt.verify(token as string, process.env.JWT_SECRET as string);
   const user_id = decoded.id;
 
-  if (!newEmail || !newPassword || !newUsername) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-
+  // todo es opcional asi que habra que validar uno por uno y si existe hay que cambiarlo
   try {
-    const { rows }: { rows: User[] } = await pool.query('SELECT * FROM users WHERE id = $1', [user_id]);
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
+    if (newEmail) {
+      await pool.query('UPDATE users SET email = $1 WHERE id = $2', [newEmail, user_id]);
     }
-    const user: User = rows[0];
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await pool.query('UPDATE users SET email = $1, username = $2, password = $3 WHERE id = $4', [newEmail, newUsername, hashedPassword, user_id]);
+    if (newPassword) {
+      await pool.query('UPDATE users SET password = $1 WHERE id = $2', [newPassword, user_id]);
+    }
+    if (newUsername) {
+      await pool.query('UPDATE users SET username = $1 WHERE id = $2', [newUsername, user_id]);
+    }
     res.status(200).json({ message: 'User updated successfully' });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors[0].message });
     }
     res.status(500).json({ error: 'Internal server error' });
-  }
-};
+ };
+}
 
 
 

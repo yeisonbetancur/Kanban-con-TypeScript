@@ -30,15 +30,15 @@ export const getCardsByColumnId = async (req: Request, res: Response): Promise< 
 
 // Crear una nueva tarjeta
 export const createCard = async (req: Request, res: Response): Promise<Response | undefined> => {
-    const { title, column_id, description, user_id, position = 1, position_column = 1 } = req.body;
+    const { title, column_id, description, user_id, position = 1} = req.body;
   
     try {
       // Validar datos con Zod
-      cardSchema.parse({ column_id, user_id, title, description, position, position_column});
+      cardSchema.parse({ column_id, user_id, title, description, position});
   
       const { rows }: {rows: Card[]} = await pool.query(
-        'INSERT INTO cards (title, column_id, description, user_id, position, position_column) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [title, column_id, description, user_id, position, position_column]
+        'INSERT INTO cards (title, column_id, description, user_id, position) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [title, column_id, description, user_id, position]
       );
 
       // obtener los datos de su columna
@@ -135,20 +135,20 @@ export const updateCardPosition = async (req: Request, res: Response): Promise<R
     }
   };
 
-// cambiar la posicion de la targeta con position_column
+// cambiar la posicion de la targeta con column_id
 export const updateCardPosition_column = async (req: Request, res: Response): Promise<Response | undefined> => {
-  const { position_column, id } = req.body;
+  const { column_id, id } = req.body;
   // Validar los datos manualmente
   if (id === 'undefined' || parseInt(id) <= 0 || !Number.isInteger(parseInt(id))) {
     return res.status(400).json({ error: 'Invalid card id' });
   }
-  if (position_column === 'undefined' || parseInt(position_column) <= 0 || !Number.isInteger(parseInt(position_column))) { 
+  if (column_id === 'undefined' || parseInt(column_id) <= 0 || !Number.isInteger(parseInt(column_id))) { 
     return res.status(400).json({ error: 'Invalid position' });
   }
   try {
     const { rows }: { rows: Card[] } = await pool.query(
-      'UPDATE cards SET position_column = $1 WHERE id = $2 RETURNING *',
-      [position_column, id]
+      'UPDATE cards SET column_id = $1 WHERE id = $2 RETURNING *',
+      [column_id, id]
     );
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Card not found' });

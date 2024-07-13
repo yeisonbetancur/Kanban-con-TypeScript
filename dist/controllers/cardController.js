@@ -25,11 +25,11 @@ export const getCardsByColumnId = async (req, res) => {
 };
 // Crear una nueva tarjeta
 export const createCard = async (req, res) => {
-    const { title, column_id, description, user_id, position = 1, position_column = 1 } = req.body;
+    const { title, column_id, description, user_id, position = 1 } = req.body;
     try {
         // Validar datos con Zod
-        cardSchema.parse({ column_id, user_id, title, description, position, position_column });
-        const { rows } = await pool.query('INSERT INTO cards (title, column_id, description, user_id, position, position_column) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [title, column_id, description, user_id, position, position_column]);
+        cardSchema.parse({ column_id, user_id, title, description, position });
+        const { rows } = await pool.query('INSERT INTO cards (title, column_id, description, user_id, position) VALUES ($1, $2, $3, $4, $5) RETURNING *', [title, column_id, description, user_id, position]);
         // obtener los datos de su columna
         const { rows: column } = await pool.query('SELECT * FROM columns WHERE id = $1', [column_id]);
         if (rows.length === 0) {
@@ -112,18 +112,18 @@ export const updateCardPosition = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
-// cambiar la posicion de la targeta con position_column
+// cambiar la posicion de la targeta con column_id
 export const updateCardPosition_column = async (req, res) => {
-    const { position_column, id } = req.body;
+    const { column_id, id } = req.body;
     // Validar los datos manualmente
     if (id === 'undefined' || parseInt(id) <= 0 || !Number.isInteger(parseInt(id))) {
         return res.status(400).json({ error: 'Invalid card id' });
     }
-    if (position_column === 'undefined' || parseInt(position_column) <= 0 || !Number.isInteger(parseInt(position_column))) {
+    if (column_id === 'undefined' || parseInt(column_id) <= 0 || !Number.isInteger(parseInt(column_id))) {
         return res.status(400).json({ error: 'Invalid position' });
     }
     try {
-        const { rows } = await pool.query('UPDATE cards SET position_column = $1 WHERE id = $2 RETURNING *', [position_column, id]);
+        const { rows } = await pool.query('UPDATE cards SET column_id = $1 WHERE id = $2 RETURNING *', [column_id, id]);
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Card not found' });
         }
